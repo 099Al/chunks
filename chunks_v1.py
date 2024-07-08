@@ -40,23 +40,7 @@ def test_asset():
 """
 Желаемый размер чанка определяется значением b
 """
-
-if __name__ == "__main__":
-
-    # df = make_timeseries(
-    #     start="2023-01-01 00:00:00", end="2023-01-01 00:00:15", freq="1s", seed=None
-    # )
-    # df.to_csv("text_6.csv")
-
-
-    df = test_asset()
-    # df = pd.read_csv('csv_chunk.csv')
-
-    row_cnt, col_cnt = df.shape
-    print("rows", row_cnt)
-
-    a, b = 1, 7
-
+def chunks(df, b):
     prev_dt = None
     s = 0
     cnt = 0
@@ -78,8 +62,28 @@ if __name__ == "__main__":
     if row_cnt - s > 0:
         l.append((s, row_cnt))
 
-    print(l)
+    return l
 
-    for a, b in l:
-        print(f"{a}-{b}----------------------")
-        print(df.iloc[a : b + 1])
+if __name__ == "__main__":
+
+    # df = make_timeseries(
+    #     start="2023-01-01 00:00:00", end="2023-01-01 00:00:15", freq="1s", seed=None
+    # )
+    # df.to_csv("text_6.csv")
+
+
+    df = test_asset()
+    # df = pd.read_csv('csv_chunk.csv')
+
+    row_cnt, col_cnt = df.shape
+    print("rows", row_cnt)
+
+    a, b = 1, 7
+
+    l_chunks = chunks(df, b)
+
+    print(l_chunks)
+
+    for x, y in l_chunks:
+        print(f"{x}-{y}----------------------")
+        print(df.iloc[x : y + 1])
