@@ -1,7 +1,20 @@
 import pandas as pd
 import re
-import numpy as np
 
+
+"""
+Желаемы размер чанка определяется числами a и b
+Если кол-во записей меньше чем a, то чанк продолжает заполняеться новыми значениями.
+
+Если кол-во записей в чанке больше чем a, то нужно следить за изменениями поля dt:
+    1. если значение dt поменялось до того как чанк заполнился до значения b, то эти записи остаются в чанке.
+    2. если dt поменялось после того как кол-во записей стало больше b, то 
+       записи с предпоследним dt идут в новый чанк (dt, который вылез за предел b).
+       В предыдущем чанке записей будет в промежутке (a,b)
+
+Если изменение dt было до достижения a,
+следующее изменение dt было после достижения b, то размер чанка будет больше b.
+"""
 
 def test_asset():
 
@@ -10,17 +23,18 @@ def test_asset():
     return pd.DataFrame({"dt": dfs.repeat(2)})
 
 
-
 def test_avg_chunck_size(chunk_list, new_chunk):
     new_chunk_size = new_chunk[1] - new_chunk[0]
-    avg_chunk_size = sum((map(lambda x: (x[1] - x[0]), chunk_list))) / len(chunk_list)
-    if new_chunk_size > avg_chunk_size * 3:
-        print('Data skew warning !')
+    if len(chunk_list):
+        avg_chunk_size = sum((map(lambda x: (x[1] - x[0]), chunk_list))) / len(chunk_list)
+        if new_chunk_size > avg_chunk_size * 3:
+            print("Data skew warning !")
+
 
 def test_date_format(x):
-    pattern = r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$'
+    pattern = r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"
     if not re.match(pattern, x):
-        raise Exception ('Not Valid format', x)
+        raise Exception("Not Valid format", x)
     return True
 
 
@@ -37,33 +51,27 @@ def chunks(df, a, b):
         cnt += 1
         row = df.iloc[x]
 
-        test_date_format(row['dt'])
+        test_date_format(row["dt"])
 
         v = row["dt"]
         if v == prev_dt:
-            if flag == 1 and cnt > b:  # проверяем, чтобы не было переполнения
-                # произошел перебор по одинаковой дате
-                l_chunk.append((s, s2))  # закрыли предыдущий период
+            if flag == 1 and cnt > b:
+                l_chunk.append((s, s2))
                 cnt = x - s2
-                s = s2 + 1  # обновили начало
+                s = s2 + 1
                 flag = 0
         else:
-            # if (cnt < a):  # Продолжаем
             if cnt >= a:
-                if cnt <= b:  # находимся внутри a b, произошла перемена дат
+                if cnt <= b:
                     flag = 1
-                    s2 = x - 1  # Предедущий dt с другим значением
-                else:  # вышли за границу b => записываем чанк, и переобозначаем начало следующего
+                    s2 = x - 1
+                else:
                     l_chunk.append((s, x - 1))
                     test_avg_chunck_size(l_chunk, (s, x - 1))
                     s = x
                     cnt = 0
 
         prev_dt = v
-
-
-
-
 
     if row_cnt - s > 0:
         l_chunk.append((s, row_cnt))
@@ -75,12 +83,12 @@ if __name__ == "__main__":
 
     # df = test_asset()
 
-    df = pd.read_csv("test_3.csv")
+    df = pd.read_csv("test_6.csv")
 
     row_cnt, col_cnt = df.shape
     print("rows", row_cnt)
 
-    a, b = 6, 8
+    a, b = 3, 5
 
     l = chunks(df, a, b)
 
@@ -88,12 +96,12 @@ if __name__ == "__main__":
 
     for a, b in l:
         print(f"{a}-{b}----------------------")
-        print(df.iloc[a:b + 1])
+        df_i = df.iloc[a : b + 1]
+        print(df_i)
 
-
-
-
-
-
-
-
+        # nan_row = df_i.isnull().values.any()
+        nan_row = df_i["atr1"].isnull()
+        if nan_row.any():
+            print("Null Values", df_i[nan_row])
+            # raise Exception ('В столбце atr1 есть null значения')
+        # df.to_csv(f'chunk-{a}-{b}.csv', index=False)
