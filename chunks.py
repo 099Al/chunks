@@ -1,5 +1,5 @@
 import pandas as pd
-
+import re
 import numpy as np
 
 
@@ -17,6 +17,13 @@ def test_avg_chunck_size(chunk_list, new_chunk):
     if new_chunk_size > avg_chunk_size * 3:
         print('Data skew warning !')
 
+def test_date_format(x):
+    pattern = r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$'
+    if not re.match(pattern, x):
+        raise Exception ('Not Valid format', x)
+    return True
+
+
 def chunks(df, a, b):
     prev_dt = None
     s = 0
@@ -29,6 +36,9 @@ def chunks(df, a, b):
     for x in range(0, row_cnt):
         cnt += 1
         row = df.iloc[x]
+
+        test_date_format(row['dt'])
+
         v = row["dt"]
         if v == prev_dt:
             if flag == 1 and cnt > b:  # проверяем, чтобы не было переполнения
