@@ -10,6 +10,13 @@ def test_asset():
     return pd.DataFrame({"dt": dfs.repeat(2)})
 
 
+
+def test_avg_chunck_size(chunk_list, new_chunk):
+    new_chunk_size = new_chunk[1] - new_chunk[0]
+    avg_chunk_size = sum((map(lambda x: (x[1] - x[0]), chunk_list))) / len(chunk_list)
+    if new_chunk_size > avg_chunk_size * 3:
+        print('Data skew warning !')
+
 def chunks(df, a, b):
     prev_dt = None
     s = 0
@@ -38,10 +45,15 @@ def chunks(df, a, b):
                     s2 = x - 1  # Предедущий dt с другим значением
                 else:  # вышли за границу b => записываем чанк, и переобозначаем начало следующего
                     l_chunk.append((s, x - 1))
+                    test_avg_chunck_size(l_chunk, (s, x - 1))
                     s = x
                     cnt = 0
 
         prev_dt = v
+
+
+
+
 
     if row_cnt - s > 0:
         l_chunk.append((s, row_cnt))
@@ -67,3 +79,11 @@ if __name__ == "__main__":
     for a, b in l:
         print(f"{a}-{b}----------------------")
         print(df.iloc[a:b + 1])
+
+
+
+
+
+
+
+
