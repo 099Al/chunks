@@ -94,11 +94,12 @@ if __name__ == "__main__":
 
     print(l)
 
-    for a, b in l:
-        print(f"{a}-{b}----------------------")
-        df_i = df.iloc[a : b + 1]
+    for x, y in l:
+        print(f"{x}-{y}----------------------")
+        df_i = df.iloc[x : y + 1]
         print(df_i)
 
+        #Проверка на Null
         # nan_row = df_i.isnull().values.any()
         nan_row = df_i["atr1"].isnull()
         if nan_row.any():
