@@ -43,12 +43,11 @@ def test_asset():
 
 if __name__ == "__main__":
 
-    df = make_timeseries(
-        start="2023-01-01 00:00:00", end="2023-01-01 00:00:15", freq="1s", seed=None
-    )
-    df.to_csv("text_6.csv")
+    # df = make_timeseries(
+    #     start="2023-01-01 00:00:00", end="2023-01-01 00:00:15", freq="1s", seed=None
+    # )
+    # df.to_csv("text_6.csv")
 
-    exit()
 
     df = test_asset()
     # df = pd.read_csv('csv_chunk.csv')
@@ -63,9 +62,6 @@ if __name__ == "__main__":
     cnt = 0
     l = []
     for x in range(0, row_cnt):
-
-        if x == 6:
-            pass
         row = df.iloc[x]
         v = row["dt"]
         if v == prev_dt:
